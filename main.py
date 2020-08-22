@@ -6,6 +6,10 @@ import datetime
 import shutil
 import sys
 
+print('\033[2J')
+RED = '\033[31m'   # mode 31 = red forground
+RESET = '\033[0m'  # mode 0  = reset
+
 
 def foo(hive, flag):
     aReg = winreg.ConnectRegistry(None, hive)
@@ -59,6 +63,10 @@ def specialCase(app):
     if ('text editor' in app) or ('editor' in app):
         os.system("start notepad")
         reply("Opening notepad...")
+        return True
+    if ('vs editor' in app) or ('vs code' in app) or (('code' in app) and ('vs' in app)):
+        os.system("code")
+        reply("Opening Visual Studio code")
         return True
     elif ('video player' in app) or ('player' in app) or ("media player" in app):
         os.system("start vlc")
@@ -122,24 +130,31 @@ def specialCase(app):
 
 
 def runApp(app, exFile=""):
+
     x = os.system(app + " " + exFile)
     if x == 1:
+        job = False
         for software in software_list:
+
             # or software['name'].casefold().find(app.casefold()):
             if (app.casefold() in software['name'].casefold()):
                 if ".exe" in software['DisplayIcon']:
                     software['DisplayIcon'].replace("\\", '/')
-                    file = software['DisplayIcon'].replace(",0", '')
+                    # file = software['DisplayIcon'].replace(",0", '')
+                    file = software['DisplayIcon'].split(',')[0]
                     reply("Sure sir")
-                    reply("Opening " + app)
+                    reply("Opening " + software['name'] + " ...")
                     os.startfile(file + " " + exFile)
+                    job = True
+                    return True
                 else:
                     reply("Sorry! I am unable to find the programm in your computer")
                 break
+        if not job:
+            reply("Sorry! I am unable to find the programm in your computer")
     elif x == 0:
+        reply("Opening " + app)
         pass
-        # reply("sure sir.")
-        # reply("Opening " + app)
     else:
         reply("Sorry! I am unable to find the programm in your computer")
 
@@ -149,7 +164,7 @@ def runApp(app, exFile=""):
 def reqtype(req):
     y = req.split()
     # Here i can't use (note in req) because when the in put conatain notepad it return true
-    if ("not" in y) or ("don't" in y) or ("dont" in y):  # or ("doesn't"):
+    if ("not" in y) or ("don't" in y) or ("dont" in y):
         return 'neg'
     else:
         return "pos"
@@ -166,12 +181,12 @@ def request(req):
     # can  you run firefox
     # can  you run the firefox for me
     if 'pos' == reqtype(req):
-        if ("run" in req) or ("open" in req) or ("execute" in req):
+        if ("run" in req) or ("open" in req) or ("execute" in req) or ("start" in req):
             # Getting tha app
             if not specialCase(req):
                 wordsList = req.split()
                 inx = -1
-                for p in ["run", "open", "execute"]:
+                for p in ["run", "open", "execute", 'start']:
                     try:
                         inx = wordsList.index(p)
                         if inx != -1:
@@ -182,7 +197,7 @@ def request(req):
                         pass
 
                 while inx < len(wordsList):
-                    if (wordsList[inx] == "the" or wordsList[inx] == "a" or wordsList[inx] == 'in'):
+                    if (wordsList[inx] == "the" or wordsList[inx] == "a" or wordsList[inx] == 'in' or wordsList[inx] == 'me' or wordsList[inx] == 'for'):
                         inx = inx + 1
                     else:
                         runApp(wordsList[inx])
@@ -223,7 +238,7 @@ def action(command):
     # Work with programms
     elif ("please" in command) or ("plz" in command) or ("can you" in command) or ("can u" in command) or ("want open" in command) or ("want to opne" in command):
         request(command)
-    elif ("open" in command) or ("run" in command) or ("execute" in command):
+    elif ("open" in command) or ("run" in command) or ("execute" in command) or ("start" in command):
         request(command)
     elif ("play" in command):
         specialCase(command)
@@ -232,7 +247,7 @@ def action(command):
         reply("The current time is " + time.strftime('%I') + " hours " + time.strftime("%M") + " minutes " +
               " and date is " + time.strftime('%d') + " " + time.strftime('%B') + " " + time.strftime('%Y'))
         return True
-    elif ("exit" in command) or ("quit" in command) or ("by" in command):
+    elif ("exit" in command) or ("quit" in command) or ("by" in command) or ("bay" in command):
         if reqtype(command) == "pos":
             reply("See you soon :)")
             exit()
@@ -270,8 +285,10 @@ def getCommand(forWhat):
 
 
 def reply(message):
+    print('\033[92m', end="")
     printRight(message + " <<")
     pyttsx3.speak(message)
+    print('\033[0m', end="")
     return True
 
 
@@ -286,13 +303,15 @@ print('-'*columns)
 msg = 'WLCOME TO THE IIEC-RISE CHALLENGE ASSISTANCE'
 reply(msg + " " * int((columns - len(msg))/2))
 reply("Developed By: Navneet Chandra Maurya")
+print("Tested onlyon: Windows")
 print("Honestly:")
 print("This program developed with the inspiration by IIEC RISE community")
 #
 print("Took help from : ")
 print("https://tackoverflow.com")
 print("https://docs.python.org/3/")
-print("Comman commands:")
+print("https://www.devdungeon.com/content/colorize-terminal-output-python")
+print("Common commands:")
 print(">>> hi, hello, hey or namaste")
 print(">>> who r you")
 print(">>> how r you")
@@ -307,7 +326,7 @@ print("*Many app can be open which are added to environment variable and also ot
 print("*Want to know:")
 print("'pass' keyword which is added to my code by editor.")
 print("Dont't know too much about 'try except' keywords in python")
-print('\nThank you sir for this great initiative. I is also thankful to all IIEC-RISE members who are working hard for us to grow up our skills.')
+print('\nThank you, sir, for this great initiative. I am also thankful to all IIEC-RISE members who are working hard for us to grow up our skills.')
 print('-'*columns)
 #
 reply("Namaste sir!")
@@ -320,24 +339,8 @@ command = ""
 # Chat
 while True:
     command = getCommand(">>> ")
-    action(command)
+    if command != "":
+        action(command)
+        pass
 
 # ####################################################################################
-#
-#                                   //       \\
-#                                  ||         ||
-#                                  ||   USE   ||
-#                                  ||    ME   ||
-#                                  ||         ||
-#                                  |||||||||||||
-
-# os.system('cd C:\\Users\Navneet Maurya\AppData\Local\Programs\Microsoft VS Code')
-
-# ################
-# for software in software_list:
-#     print('{ \n Name=%s, \n Version=%s, \n Publisher=%s, \n Path=%s, \n File=%s \n},' %
-#           (software['name'], software['version'], software['publisher'], software['InstallLocation'], software['DisplayIcon']))
-# print('Number of installed apps: %s' % len(software_list)
-# TEXT ALIGN
-# https://stackoverflow.com/questions/9640109/allign-left-and-right-in-python
-# https: // stackoverflow.com/questions/566746/how-to-get-linux-console-window-width-in-python/943921  # 943921
