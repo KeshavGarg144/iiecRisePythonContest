@@ -1,12 +1,11 @@
 import winreg
 import os
-import subprocess
 import pyttsx3
 import datetime
 import shutil
 import sys
 
-print('\033[2J')
+os.system("cls")  # Clear
 RED = '\033[31m'   # mode 31 = red forground
 RESET = '\033[0m'  # mode 0  = reset
 
@@ -68,21 +67,13 @@ def specialCase(app):
         os.system("code")
         reply("Opening Visual Studio code")
         return True
-    elif ('video player' in app) or ('player' in app) or ("media player" in app):
+    elif ('play' in app) and (("music" in app) or "song" in app) or ('music player' in app) or (('music' in app) and ("player" in app)):
         os.system("start vlc")
-        reply("Opening VLC Meadia player...")
+        reply("Opening VLC player, you can play music from here...")
         return True
-    elif ('music player' in app) or (('music' in app) and ("player" in app)):
+    elif ('play' in app) and (('video' in app) or ('vid' in app)) or (('player' in app) or ("video" in app)):
         os.system("start vlc")
-        reply("Opening VLC Music player...")
-        return True
-    elif ('play' in app) and (("music" in app) or "song" in app):
-        os.system("start vlc")
-        reply("Opening VLC Music player, you can play music from here...")
-        return True
-    elif ('play' in app) and (('video' in app) or ('vid' in app)):
-        os.system("start vlc")
-        reply("Opening VLC Music player, you can play video from here...")
+        reply("Opening VLC player, you can play video from here...")
         return True
     elif ('browser' in app) or ('browse' in app):
         runApp("chrome")
@@ -100,6 +91,7 @@ def specialCase(app):
                     inx = inx + 1
                 else:
                     # runApp(u1[inx], url)
+                    reply("Opening " + url + " in " + u1[inx])
                     os.system('start ' + u1[inx] + " " + url)
                     break
             pass
@@ -110,6 +102,7 @@ def specialCase(app):
                     inx = inx + 1
                 else:
                     # runApp(u2[inx], url)
+                    reply("Opening " + url + " in " + u2[inx])
                     os.system('start ' + u2[inx] + " " + url)
                     break
             pass
@@ -144,8 +137,14 @@ def runApp(app, exFile=""):
                     file = software['DisplayIcon'].split(',')[0]
                     reply("Sure sir")
                     reply("Opening " + software['name'] + " ...")
-                    os.startfile(file + " " + exFile)
-                    job = True
+                    try:
+                        os.startfile(file + " " + exFile)
+                        job = True
+                        pass
+                    except:
+                        job = False
+                        pass
+
                     return True
                 else:
                     reply("Sorry! I am unable to find the programm in your computer")
@@ -233,6 +232,8 @@ def action(command):
         reply("today is " + time.strftime('%d') + " " + time.strftime('%B') + " " + time.strftime('%Y') +
               " and the time is " + time.strftime('%I') + " hours " + time.strftime("%M") + " minutes ")
         reply("Have a greate day :)")
+    elif "thanks" in command or ((("thanks" in command) or ("thank" in command)) and (('you' in command) or ('u' in command))):
+        reply("My pleasure")
     elif ("i am fine" in command) or ("i am good" in command) or ("i'm good" in command) or ("i'm fine" in command):
         reply("that's greate, Keep smiling.")
     # Work with programms
@@ -343,4 +344,3 @@ while True:
         action(command)
         pass
 
-# ####################################################################################
