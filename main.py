@@ -1,10 +1,14 @@
 import winreg
 import os
-import pyttsx3
+import pyttsx3 as ptx
 import datetime
 import shutil
 import sys
 
+engine =pts.init()
+engine.setProperty("rate",200) #Controll the voice speed of computer 
+pts.speak("Welcome to Voice Module")
+engine.runAndWait() #THis is used to maintain a gap while speaking so that its sound more realsitic
 os.system("cls")  # Clear
 RED = '\033[31m'   # mode 31 = red forground
 RESET = '\033[0m'  # mode 0  = reset
